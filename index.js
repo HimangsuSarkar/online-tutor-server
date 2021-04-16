@@ -19,6 +19,7 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect(err => {
     const tutorCollection = client.db("onlineTutor").collection("tutors");
+    const reviewCollection = client.db("onlineTutor").collection("reviews");
 
     // app.post('/addTutor', (req, res) => {
     //     const tutor = req.body;
@@ -37,7 +38,33 @@ client.connect(err => {
 
             })
     })
+
+    app.get('/service', (req, res) => {
+        tutorCollection.find()
+            .toArray((err, service) => {
+                res.send(service)
+            })
+    })
+
+    app.post('/addReview', (req, res) => {
+        const reviews = req.body;
+        reviewCollection.insertOne(reviews)
+            .then(result => {
+                console.log(result.insertedCount);
+                res.send(result.insertedCount > 0)
+            })
+    })
+
+    app.get('/review', (req, res) => {
+        // console.log(req.query.email);
+        reviewCollection.find()
+            .toArray((err, review) => {
+                res.send(review)
+            })
+    })
 });
+
+
 
 app.get('/', (req, res) => {
     res.send('Hello World!')
