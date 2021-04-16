@@ -20,11 +20,21 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 client.connect(err => {
     const tutorCollection = client.db("onlineTutor").collection("tutors");
 
-    app.post('/addTutor', (req, res) => {
-        const tutor = req.body;
-        tutorCollection.insertOne(tutor)
+    // app.post('/addTutor', (req, res) => {
+    //     const tutor = req.body;
+    //     tutorCollection.insertOne(tutor)
+    //         .then(result => {
+    //             res.send(result.insertedCount);
+    //         })
+    // })
+    app.post('/addService', (req, res) => {
+        const newServices = req.body;
+        console.log('adding new service: ', newServices);
+        tutorCollection.insertOne(newServices)
+            // res.redirect('/')
             .then(result => {
-                res.send(result.insertedCount);
+                res.send(result.insertedCount > 0)
+
             })
     })
 });
