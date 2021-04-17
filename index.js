@@ -1,6 +1,7 @@
 const express = require('express')
 const MongoClient = require('mongodb').MongoClient;
 const cors = require('cors');
+const fs = require('fs-extra');
 const fileUpload = require('express-fileupload')
 const bodyParser = require('body-parser');
 require('dotenv').config()
@@ -21,14 +22,40 @@ client.connect(err => {
     const tutorCollection = client.db("onlineTutor").collection("tutors");
     const reviewCollection = client.db("onlineTutor").collection("reviews");
     const enrollCollection = client.db("onlineTutor").collection("enrolls");
+    const adminCollection = client.db("onlineTutor").collection("admins");
 
-    // app.post('/addTutor', (req, res) => {
-    //     const tutor = req.body;
-    //     tutorCollection.insertOne(tutor)
-    //         .then(result => {
-    //             res.send(result.insertedCount);
-    //         })
-    // })
+    app.post('/addAdmin', (req, res) => {
+        const file = req.files.file;
+        const name = req.body.name;
+        const email = req.body.email;
+        const filePath = `${__dirname}/admins/${file.name}`;
+        file.mv(filePath, err => {
+            if (err) {
+                console.log(err);
+                res.status(500).send({ msg: 'filled to upload' });
+            }
+            const newImg = fs.readFileSync(filePath);
+            const encImg = newImg.toString('base64');
+            var image = {
+                contentType: file.mimetype,
+                size: file.size,
+                img: Buffer.from(encImg, 'base64')
+            };
+            adminCollection.insertOne({ name, email, image })
+                .then(result => {
+                    fs.remove(filePath, error => {
+                        if (error) {
+                            console.log(error)
+                            res.status(500).send({ msg: 'filled to upload' });
+                        }
+                        res.send(result.insertedCount > 0);
+                    })
+
+                })
+        })
+
+    })
+
     app.post('/addService', (req, res) => {
         const newServices = req.body;
         console.log('adding new service: ', newServices);
@@ -85,6 +112,14 @@ client.connect(err => {
         enrollCollection.find()
             .toArray((err, enroll_list) => {
                 res.send(enroll_list)
+            })
+    })
+
+    app.post('/isAdmin', (req, res) => {
+        const email = req.body.email;
+        adminCollection.find({ email: email })
+            .toArray((err, admins) => {
+                res.send(admins.length > 0);
             })
     })
 });
