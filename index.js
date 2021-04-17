@@ -79,6 +79,14 @@ client.connect(err => {
                 res.send(result.insertedCount > 0)
             })
     })
+
+    app.get('/enroll_list', (req, res) => {
+        // console.log(req.query.email);
+        enrollCollection.find()
+            .toArray((err, enroll_list) => {
+                res.send(enroll_list)
+            })
+    })
 });
 
 
