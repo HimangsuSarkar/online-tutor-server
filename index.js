@@ -8,6 +8,10 @@ require('dotenv').config()
 const app = express()
 const port = process.env.PORT || 5000;
 
+app.get('/', (req, res) => {
+    res.send("hello from db it's working working")
+})
+
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static('admins'));
@@ -28,33 +32,34 @@ client.connect(err => {
         const file = req.files.file;
         const name = req.body.name;
         const email = req.body.email;
-        const filePath = `${__dirname}/admins/${file.name}`;
-        file.mv(filePath, err => {
-            if (err) {
-                console.log(err);
-                res.status(500).send({ msg: 'filled to upload' });
-            }
-            const newImg = fs.readFileSync(filePath);
-            const encImg = newImg.toString('base64');
-            var image = {
-                contentType: file.mimetype,
-                size: file.size,
-                img: Buffer.from(encImg, 'base64')
-            };
-            adminCollection.insertOne({ name, email, image })
-                .then(result => {
-                    fs.remove(filePath, error => {
-                        if (error) {
-                            console.log(error)
-                            res.status(500).send({ msg: 'filled to upload' });
-                        }
-                        res.send(result.insertedCount > 0);
-                    })
+        // const filePath = `${__dirname}/admins/${file.name}`;
+        // file.mv(filePath, err => {
+        //     if (err) {
+        //         console.log(err);
+        //         res.status(500).send({ msg: 'filled to upload' });
+        //     }
+        const newImg = file.data;
+        const encImg = newImg.toString('base64');
+        var image = {
+            contentType: file.mimetype,
+            size: file.size,
+            img: Buffer.from(encImg, 'base64')
+        };
+        adminCollection.insertOne({ name, email, image })
+            .then(result => {
+                fs.remove(filePath, error => {
+                    // if (error) {
+                    //     console.log(error)
+                    //     res.status(500).send({ msg: 'filled to upload' });
+                    // }
+                    res.send(result.insertedCount > 0);
+                    // })
 
                 })
-        })
-
+            })
     })
+
+
 
     app.post('/addService', (req, res) => {
         const newServices = req.body;
@@ -125,9 +130,4 @@ client.connect(err => {
 });
 
 
-
-app.get('/', (req, res) => {
-    res.send('Hello World!')
-})
-
-app.listen(port)
+app.listen(process.env.PORT || port)
