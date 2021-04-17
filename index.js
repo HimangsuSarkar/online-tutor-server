@@ -20,6 +20,7 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 client.connect(err => {
     const tutorCollection = client.db("onlineTutor").collection("tutors");
     const reviewCollection = client.db("onlineTutor").collection("reviews");
+    const enrollCollection = client.db("onlineTutor").collection("enrolls");
 
     // app.post('/addTutor', (req, res) => {
     //     const tutor = req.body;
@@ -46,6 +47,13 @@ client.connect(err => {
             })
     })
 
+    app.get('/service/:key', (req, res) => {
+        tutorCollection.find({ key: req.params.key })
+            .toArray((err, service) => {
+                res.send(service[0])
+            })
+    })
+
     app.post('/addReview', (req, res) => {
         const reviews = req.body;
         reviewCollection.insertOne(reviews)
@@ -60,6 +68,15 @@ client.connect(err => {
         reviewCollection.find()
             .toArray((err, review) => {
                 res.send(review)
+            })
+    })
+
+    app.post('/addEnroll', (req, res) => {
+        const enrolls = req.body;
+        enrollCollection.insertOne(enrolls)
+            .then(result => {
+                console.log(result.insertedCount);
+                res.send(result.insertedCount > 0)
             })
     })
 });
