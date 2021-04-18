@@ -113,6 +113,14 @@ client.connect(err => {
 
     app.get('/enroll_list', (req, res) => {
         // console.log(req.query.email);
+        enrollCollection.find({ email: req.query.email })
+            .toArray((err, enroll_list) => {
+                res.send(enroll_list)
+            })
+    })
+
+    app.get('/students', (req, res) => {
+        // console.log(req.query.email);
         enrollCollection.find()
             .toArray((err, enroll_list) => {
                 res.send(enroll_list)
