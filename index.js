@@ -60,7 +60,6 @@ client.connect(err => {
     })
 
 
-
     app.post('/addService', (req, res) => {
         const newServices = req.body;
         console.log('adding new service: ', newServices);
